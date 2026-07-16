@@ -3,4 +3,6 @@
 
     do $system.OBJ.Import("/home/irisowner/dev/src", "ck")
 
+    set ^Ens.Config.DefaultSettingsD("*","*","*","TECHNIDATA")	=	$lb("DGLAB-V2","",1) ;# add default settings for TECHNIDATA (Deployable=1)
+
     halt
