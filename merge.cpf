@@ -1,0 +1,13 @@
+[config]
+globals=0,0,2048,0,0,0
+routines=0
+jrnbufs=128
+wijdir=/WIJ
+
+[Journal]    
+CurrentDirectory=/journal
+AlternateDirectory=/journal2
+
+[Startup]
+SystemMode=TEST
+TerminalPrompt=1,2,8
