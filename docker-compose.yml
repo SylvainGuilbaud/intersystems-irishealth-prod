@@ -18,6 +18,8 @@ services:
     environment:
       - TZ=Europe/Paris
       - ISC_DATA_DIRECTORY=/iris-data
+      # - ISC_CPF_MERGE_FILE=/merge.cpf
+
  
   webgateway:
     image: containers.intersystems.com/intersystems/webgateway:latest-em

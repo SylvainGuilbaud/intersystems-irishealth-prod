@@ -9,5 +9,5 @@ CurrentDirectory=/journal
 AlternateDirectory=/journal2
 
 [Startup]
-SystemMode=TEST
+SystemMode=TECHNIDATA
 TerminalPrompt=1,2,8
