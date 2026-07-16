@@ -11,14 +11,18 @@ services:
       - ${IRIS_PORT}:1972
     volumes:
       - iris-data:/iris-data
+      - /journal1:/journal1
+      - /journal2:/journal2
+      - /wij:/wij
       - ./iris/key/iris.key:/tmp/iris.key:ro
       - ./iris/python/iris_python_demo:/usr/irissys/mgr/python/iris_python_demo
+      - ./merge.cpf:/merge.cpf
     command: --key /tmp/iris.key
     restart: unless-stopped
     environment:
       - TZ=Europe/Paris
       - ISC_DATA_DIRECTORY=/iris-data
-      # - ISC_CPF_MERGE_FILE=/merge.cpf
+      - ISC_CPF_MERGE_FILE=/merge.cpf
 
  
   webgateway:
@@ -42,3 +46,6 @@ services:
  
 volumes:
   iris-data:
+  # journal1:
+  # journal2:
+  # wij:

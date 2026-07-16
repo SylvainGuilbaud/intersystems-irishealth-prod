@@ -2,10 +2,10 @@
 globals=0,0,2048,0,0,0
 routines=0
 jrnbufs=128
-wijdir=/WIJ
+wijdir=/wij
 
 [Journal]    
-CurrentDirectory=/journal
+CurrentDirectory=/journal1
 AlternateDirectory=/journal2
 
 [Startup]
