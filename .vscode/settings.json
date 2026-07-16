@@ -1,0 +1,18 @@
+{
+    "objectscript.conn": {
+        "active": false,
+        "server": "iris-prod",
+        "ns": "USER"
+    },
+    "intersystems.servers": {
+        "irishealth-prod": {
+            "webServer": {
+                "scheme": "http",
+                "host": "localhost",
+                // "host": "host.docker.internal",
+                "port": 881
+            },
+            "username": "superuser"
+        },
+    },
+}

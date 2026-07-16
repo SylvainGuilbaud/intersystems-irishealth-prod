@@ -1,0 +1,42 @@
+services:
+
+  iris:
+    build:
+      args:
+        IMAGE: containers.intersystems.com/intersystems/irishealth:latest-em
+      context: iris
+    container_name: irishealth
+    hostname: irishealth
+    ports:
+      - ${IRIS_PORT}:1972
+    volumes:
+      - iris-data:/iris-data
+      - ./iris/key/iris.key:/tmp/iris.key:ro
+      - ./iris/python/iris_python_demo:/usr/irissys/mgr/python/iris_python_demo
+    command: --key /tmp/iris.key
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Paris
+      - ISC_DATA_DIRECTORY=/iris-data
+ 
+  webgateway:
+    image: containers.intersystems.com/intersystems/webgateway:latest-em
+
+    depends_on:
+      - iris
+    ports:
+      - ${WEBGATEWAY_PORT_HTTP}:80
+      - ${WEBGATEWAY_PORT_HTTPS}:443
+    restart: unless-stopped
+    environment:
+    - ISC_CSP_CONF_FILE=/webgateway/CSP.conf
+    - ISC_CSP_INI_FILE=/webgateway/CSP.ini
+    volumes:
+    - type: bind
+      source: ./webgateway
+      target: /webgateway
+    networks:
+      - default
+ 
+volumes:
+  iris-data:
