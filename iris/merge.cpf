@@ -1,11 +1,3 @@
-[Startup]
-SystemMode=TECHNIDATA
-
-[config]
-globals=0,0,32768,0,0,0
-routines=0
-jrnbufs=1024
-
 [Actions]
 
 Execute:Namespace="%SYS",ClassName="Security.Users",MethodName="UnExpireUserPasswords",Arg1="*"
@@ -16,5 +8,12 @@ CreateDatabase:Name=TD_DATA,Directory=/usr/irissys/mgr/TD_DATA,Resource=%DB_TD_D
 CreateResource:Name=%DB_TD_CODE,Description="TD_CODE database"
 CreateDatabase:Name=TD_CODE,Directory=/usr/irissys/mgr/TD_CODE,Resource=%DB_TD_CODE
 CreateNamespace:Name=TD,Globals=TD_DATA,Routines=TD_CODE,Interop=1
+
+
+CreateResource:Name=%DB_DGLAB_DATA,Description="DGLAB_DATA database"
+CreateDatabase:Name=DGLAB_DATA,Directory=/usr/irissys/mgr/DGLAB_DATA,Resource=%DB_DGLAB_DATA
+CreateResource:Name=%DB_DGLAB_CODE,Description="DGLAB_CODE database"
+CreateDatabase:Name=DGLAB_CODE,Directory=/usr/irissys/mgr/DGLAB_CODE,Resource=%DB_DGLAB_CODE
+CreateNamespace:Name=DGLAB,Globals=DGLAB_DATA,Routines=DGLAB_CODE,Interop=1
 
 ModifyService:Name=%Service_CallIn,Enabled=1,AutheEnabled=48

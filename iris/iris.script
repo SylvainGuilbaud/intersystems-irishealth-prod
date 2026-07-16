@@ -1,4 +1,6 @@
     
-    zn "USER"
+    zn "DGLAB"
+
+    do $system.OBJ.Import("/home/irisowner/dev/src", "ck")
 
     halt
