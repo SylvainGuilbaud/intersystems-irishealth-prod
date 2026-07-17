@@ -1,18 +1,4 @@
 services:
-
-  nginx:
-    image: containers.intersystems.com/intersystems/webgateway-nginx:latest-preview
-    container_name: nginx-gateway
-    depends_on:
-      - iris
-    ports:
-      - ${NGINX_PORT_HTTP:-8080}:80
-    volumes:
-      - ./nginx/CSP.conf:/opt/nginx/conf/CSP.conf
-      - ./nginx/CSP.ini:/opt/webgateway/bin/CSP.ini
-      - metrics-cache-data:/metrics-cache:ro
-    restart: unless-stopped
-
   iris:
     build:
       args:
@@ -37,10 +23,8 @@ services:
       - ISC_DATA_DIRECTORY=/iris-data
       - ISC_CPF_MERGE_FILE=/merge.cpf
 
- 
-  webgateway:
+  apache-webgateway:
     image: containers.intersystems.com/intersystems/webgateway:latest-em
-
     depends_on:
       - iris
     ports:
@@ -60,6 +44,19 @@ services:
       read_only: true
     networks:
       - default
+    
+  nginx-webgateway:
+    image: containers.intersystems.com/intersystems/webgateway-nginx:latest-preview
+    container_name: nginx-gateway
+    depends_on:
+      - iris
+    ports:
+      - ${NGINX_PORT_HTTP:-8080}:80
+    volumes:
+      - ./nginx/CSP.conf:/opt/nginx/conf/CSP.conf
+      - ./nginx/CSP.ini:/opt/webgateway/bin/CSP.ini
+      - metrics-cache-data:/metrics-cache:ro
+    restart: unless-stopped
 
   webgateway-live:
     image: containers.intersystems.com/intersystems/webgateway:latest-em
@@ -93,8 +90,8 @@ services:
   prometheus:
     image: prom/prometheus:v2.54.1
     depends_on:
-      - nginx
-      - webgateway
+      - nginx-webgateway
+      - apache-webgateway
       - metrics-cache
     ports:
       - ${PROMETHEUS_PORT_HTTP:-9090}:9090
