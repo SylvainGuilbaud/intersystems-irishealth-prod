@@ -109,7 +109,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "100 * avg_over_time(up{job=\"iris_metrics_apache\"}[5m])",
+          "expr": "100 * avg_over_time(up{job=\"iris_metrics_apache\",instance=\"apache-webgateway:80\"}[5m])",
           "instant": true,
           "legendFormat": "apache",
           "range": false,
@@ -206,7 +206,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "100 * avg_over_time(up{job=\"iris_metrics_nginx\"}[5m])",
+          "expr": "100 * avg_over_time(up{job=\"iris_metrics_nginx\",instance=\"nginx-webgateway:80\"}[5m])",
           "instant": true,
           "legendFormat": "nginx",
           "range": false,
@@ -303,7 +303,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "iris_cpu_usage",
+          "expr": "iris_cpu_usage{instance=~\"(apache-webgateway|nginx-webgateway):80\"}",
           "instant": false,
           "legendFormat": "{{gateway}} ({{instance}})",
           "range": true,
@@ -398,7 +398,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "sum by (gateway, instance) (iris_csp_actual_connections)",
+          "expr": "sum by (gateway, instance) (iris_csp_actual_connections{instance=~\"(apache-webgateway|nginx-webgateway):80\"})",
           "legendFormat": "{{gateway}} ({{instance}})",
           "range": true,
           "refId": "A"
@@ -493,7 +493,7 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "avg by (gateway, instance) (iris_csp_gateway_latency)",
+          "expr": "avg by (gateway, instance) (iris_csp_gateway_latency{instance=~\"(apache-webgateway|nginx-webgateway):80\"})",
           "legendFormat": "{{gateway}} ({{instance}})",
           "range": true,
           "refId": "A"
