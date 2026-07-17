@@ -7,13 +7,13 @@ scrape_configs:
   - job_name: iris_metrics_nginx
     metrics_path: /api/monitor/metrics
     static_configs:
-      - targets: ["nginx:80"]
+      - targets: ["nginx-webgateway:80"]
         labels:
           gateway: nginx
 
   - job_name: iris_metrics_apache
     metrics_path: /api/monitor/metrics
     static_configs:
-      - targets: ["webgateway:80"]
+      - targets: ["apache-webgateway:80"]
         labels:
           gateway: apache
