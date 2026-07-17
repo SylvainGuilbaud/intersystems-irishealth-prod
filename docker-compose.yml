@@ -55,9 +55,39 @@ services:
       target: /webgateway
     networks:
       - default
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    depends_on:
+      - nginx
+      - webgateway
+    ports:
+      - ${PROMETHEUS_PORT_HTTP:-9090}:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    depends_on:
+      - prometheus
+    ports:
+      - ${GRAFANA_PORT_HTTP:-3000}:3000
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
  
 volumes:
   iris-data:
+  prometheus-data:
+  grafana-data:
   # journal1:
   # journal2:
   # wij:

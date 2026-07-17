@@ -44,13 +44,38 @@ Defined in [docker-compose.yml](docker-compose.yml):
   - `${WEBGATEWAY_PORT_HTTPS}:443`
 - Config files mounted from [webgateway](webgateway)
 
+### prometheus
+
+- Image: `prom/prometheus:v2.54.1`
+- Depends on `nginx` and `webgateway`
+- Port: `${PROMETHEUS_PORT_HTTP}:9090`
+- Config file: [prometheus/prometheus.yml](prometheus/prometheus.yml)
+- Scrapes metrics from:
+  - `http://nginx:80/api/monitor/metrics`
+  - `http://webgateway:80/api/monitor/metrics`
+
+### grafana
+
+- Image: `grafana/grafana:11.2.0`
+- Depends on `prometheus`
+- Port: `${GRAFANA_PORT_HTTP}:3000`
+- Provisioning:
+  - Datasource: [grafana/provisioning/datasources/prometheus.yml](grafana/provisioning/datasources/prometheus.yml)
+  - Dashboards provider: [grafana/provisioning/dashboards/dashboards.yml](grafana/provisioning/dashboards/dashboards.yml)
+  - Dashboard JSON: [grafana/dashboards/iris-overview.json](grafana/dashboards/iris-overview.json)
+
 ## Prerequisites
 
 1. Docker and Docker Compose installed.
 2. A local `.env` file with at least:
    - `IRIS_PORT`
+  - `NGINX_PORT_HTTP`
    - `WEBGATEWAY_PORT_HTTP`
    - `WEBGATEWAY_PORT_HTTPS`
+  - `PROMETHEUS_PORT_HTTP`
+  - `GRAFANA_PORT_HTTP`
+  - `GRAFANA_ADMIN_USER`
+  - `GRAFANA_ADMIN_PASSWORD`
 3. Your IRIS key file copied to [iris/key/iris.key](iris/key/iris.key.to_replace_with_your_IRIS_key).
 4. Existing host directories `/journal1`, `/journal2`, and `/wij` (or update [docker-compose.yml](docker-compose.yml) to paths available on your machine).
 
@@ -73,6 +98,14 @@ Stop:
 ```bash
 ./stop.sh
 ```
+
+## Metrics and Monitoring
+
+- Prometheus UI: `http://localhost:${PROMETHEUS_PORT_HTTP}`
+- A scrape interval of 20s is configured in [prometheus/prometheus.yml](prometheus/prometheus.yml) to reduce transient `503 Service Unavailable` responses on `/api/monitor/metrics`.
+- Grafana UI: `http://localhost:${GRAFANA_PORT_HTTP}`
+- Default login is provided by `.env` (`GRAFANA_ADMIN_USER` / `GRAFANA_ADMIN_PASSWORD`).
+- Provisioned dashboard: `IRIS / IRIS Overview`.
 
 ## Operational Helpers
 
