@@ -1,5 +1,16 @@
 services:
 
+  nginx:
+    image: containers.intersystems.com/intersystems/webgateway-nginx:latest-preview
+    container_name: nginx-gateway
+    depends_on:
+      - webgateway
+    ports:
+      - ${NGINX_PORT_HTTP:-8080}:80
+    volumes:
+      - ./nginx/CSP.conf:/opt/nginx/conf/CSP.conf
+    restart: unless-stopped
+
   iris:
     build:
       args:
@@ -11,9 +22,9 @@ services:
       - ${IRIS_PORT}:1972
     volumes:
       - iris-data:/iris-data
-      - /journal1:/journal1
-      - /journal2:/journal2
-      - /wij:/wij
+      - ./journal1:/journal1
+      - ./journal2:/journal2
+      - ./wij:/wij
       - ./iris/key/iris.key:/tmp/iris.key:ro
       - ./iris/python/iris_python_demo:/usr/irissys/mgr/python/iris_python_demo
       - ./merge.cpf:/merge.cpf

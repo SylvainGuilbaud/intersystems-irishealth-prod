@@ -6,3 +6,6 @@
 **/archive/*
 backup   
 **/iris.lck
+/journal1
+/journal2
+/wij
