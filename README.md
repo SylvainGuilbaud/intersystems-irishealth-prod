@@ -1,5 +1,7 @@
 # intersystems-irishealth-prod
 
+Language: English | [Français](README-fr.md)
+
 This repository provides a Docker-based InterSystems IRIS for Health environment for an interoperability production, with independent Apache and NGINX Web Gateway front ends plus a Prometheus/Grafana monitoring stack.
 
 ## What This Stack Runs

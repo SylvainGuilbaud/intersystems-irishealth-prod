@@ -1,5 +1,7 @@
 # intersystems-irishealth-prod
 
+Langue : Français | [English](README.md)
+
 Ce depôt fournit un environnement InterSystems IRIS for Health basé sur Docker pour une production d'interopérabilité, avec deux Web Gateways indépendants (Apache et NGINX) et une pile de supervision Prometheus/Grafana.
 
 ## Ce que la stack exécute
