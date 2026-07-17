@@ -40,7 +40,7 @@ Définis dans [docker-compose.yml](docker-compose.yml) :
   - [iris/python/iris_python_demo](iris/python/iris_python_demo) monté dans le répertoire Python manager d'IRIS
   - [merge.cpf](merge.cpf) fusionné au démarrage via `ISC_CPF_MERGE_FILE`
 
-### webgateway
+### apache-webgateway
 
 - Image : `containers.intersystems.com/intersystems/webgateway:latest-em`
 - Dépend de `iris`
@@ -49,7 +49,7 @@ Définis dans [docker-compose.yml](docker-compose.yml) :
   - `${WEBGATEWAY_PORT_HTTPS}:443`
 - Fichiers de configuration montés depuis [webgateway](webgateway)
 
-### nginx
+### nginx-webgateway
 
 - Image : `containers.intersystems.com/intersystems/webgateway-nginx:latest-preview`
 - Dépend de `iris`
@@ -77,7 +77,7 @@ Flux de fonctionnement :
 
 1. `metrics-cache` interroge `webgateway-live` toutes les 20 secondes.
 2. A chaque réponse réussie, `metrics-cache` écrit la payload dans un fichier partagé.
-3. Les endpoints métriques publics Apache (`webgateway`) et NGINX (`nginx`) servent ce fichier partagé en cache.
+3. Les endpoints métriques publics Apache (`apache-webgateway`) et NGINX (`nginx-webgateway`) servent ce fichier partagé en cache.
 
 Cette approche garde Apache et NGINX indépendants pour l'accès utilisateur tout en rendant les endpoints métriques publics beaucoup plus stables lors des erreurs transitoires CSP/Web Gateway.
 
@@ -92,12 +92,12 @@ Cette approche garde Apache et NGINX indépendants pour l'accès utilisateur tou
 ### prometheus
 
 - Image : `prom/prometheus:v2.54.1`
-- Dépend de `nginx`, `webgateway` et `metrics-cache`
+- Dépend de `nginx-webgateway`, `apache-webgateway` et `metrics-cache`
 - Port : `${PROMETHEUS_PORT_HTTP}:9090`
 - Fichier de configuration : [prometheus/prometheus.yml](prometheus/prometheus.yml)
 - Scrape les métriques depuis :
-  - `http://nginx:80/api/monitor/metrics`
-  - `http://webgateway:80/api/monitor/metrics`
+  - `http://nginx-webgateway:80/api/monitor/metrics`
+  - `http://apache-webgateway:80/api/monitor/metrics`
 
 ### grafana
 
