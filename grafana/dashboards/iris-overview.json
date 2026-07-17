@@ -209,8 +209,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "iris_csp_actual_connections",
-          "legendFormat": "{{id}}",
+          "expr": "sum by (gateway, instance) (iris_csp_actual_connections)",
+          "legendFormat": "{{gateway}} ({{instance}})",
           "range": true,
           "refId": "A"
         }
@@ -273,8 +273,8 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "iris_csp_gateway_latency",
-          "legendFormat": "{{id}}",
+          "expr": "avg by (gateway, instance) (iris_csp_gateway_latency)",
+          "legendFormat": "{{gateway}} ({{instance}})",
           "range": true,
           "refId": "A"
         }

@@ -10,6 +10,7 @@ services:
     volumes:
       - ./nginx/CSP.conf:/opt/nginx/conf/CSP.conf
       - ./nginx/CSP.ini:/opt/webgateway/bin/CSP.ini
+      - metrics-cache-data:/metrics-cache:ro
     restart: unless-stopped
 
   iris:
@@ -53,14 +54,48 @@ services:
     - type: bind
       source: ./webgateway
       target: /webgateway
+    - type: volume
+      source: metrics-cache-data
+      target: /metrics-cache
+      read_only: true
     networks:
       - default
+
+  webgateway-live:
+    image: containers.intersystems.com/intersystems/webgateway:latest-em
+    depends_on:
+      - iris
+    restart: unless-stopped
+    environment:
+    - ISC_CSP_CONF_FILE=/webgateway/CSP-live.conf
+    - ISC_CSP_INI_FILE=/webgateway/CSP.ini
+    volumes:
+    - type: bind
+      source: ./webgateway
+      target: /webgateway
+    networks:
+      - default
+
+  metrics-cache:
+    build:
+      context: ./metrics-cache
+    depends_on:
+      - webgateway-live
+    environment:
+      - SOURCE_URL=http://webgateway-live:80/api/monitor/metrics
+      - POLL_INTERVAL=20
+      - REQUEST_TIMEOUT=8
+      - OUTPUT_FILE=/shared/metrics.prom
+    volumes:
+      - metrics-cache-data:/shared
+    restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:v2.54.1
     depends_on:
       - nginx
       - webgateway
+      - metrics-cache
     ports:
       - ${PROMETHEUS_PORT_HTTP:-9090}:9090
     volumes:
@@ -88,6 +123,7 @@ volumes:
   iris-data:
   prometheus-data:
   grafana-data:
+  metrics-cache-data:
   # journal1:
   # journal2:
   # wij:
