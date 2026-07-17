@@ -4,11 +4,12 @@ services:
     image: containers.intersystems.com/intersystems/webgateway-nginx:latest-preview
     container_name: nginx-gateway
     depends_on:
-      - webgateway
+      - iris
     ports:
       - ${NGINX_PORT_HTTP:-8080}:80
     volumes:
       - ./nginx/CSP.conf:/opt/nginx/conf/CSP.conf
+      - ./nginx/CSP.ini:/opt/webgateway/bin/CSP.ini
     restart: unless-stopped
 
   iris:
