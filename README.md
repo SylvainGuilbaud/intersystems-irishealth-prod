@@ -64,6 +64,21 @@ Defined in [docker-compose.yml](docker-compose.yml):
 - Uses [webgateway/CSP-live.conf](webgateway/CSP-live.conf).
 - Reserved for internal polling by `metrics-cache`.
 
+### Why `webgateway-live` Exists
+
+`webgateway-live` is an internal-only metrics source container.
+
+It is not intended for user traffic and is not exposed on a host port.
+Its only role is to provide a live `/api/monitor/metrics` endpoint to `metrics-cache`.
+
+The flow is:
+
+1. `metrics-cache` polls `webgateway-live` every 20 seconds.
+2. On each successful response, `metrics-cache` stores the payload in a shared file.
+3. Public Apache (`webgateway`) and NGINX (`nginx`) metrics endpoints serve that shared cached file.
+
+This design keeps Apache and NGINX independent for user access while making public metrics endpoints far more stable during transient CSP/Web Gateway scrape failures.
+
 ### metrics-cache
 
 - Local build context: [metrics-cache](metrics-cache)
