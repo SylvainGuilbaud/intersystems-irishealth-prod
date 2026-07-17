@@ -32,8 +32,29 @@
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
-          "max": 1,
+          "mappings": [
+            {
+              "options": {
+                "from": 99.9,
+                "result": {
+                  "text": "UP"
+                },
+                "to": 100
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "DEGRADED"
+                },
+                "to": 99.9
+              },
+              "type": "range"
+            }
+          ],
+          "max": 100,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -43,17 +64,26 @@
                 "value": 0
               },
               {
-                "color": "green",
-                "value": 1
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "yellow",
+                "value": 95
+              },
+              {
+                "color": "#7A3E9D",
+                "value": 99.9
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 6,
+        "w": 3,
         "x": 0,
         "y": 0
       },
@@ -79,14 +109,111 @@
       "targets": [
         {
           "editorMode": "code",
-          "expr": "min(up{job=~\"iris_metrics_.*\"})",
+          "expr": "100 * avg_over_time(up{job=\"iris_metrics_apache\"}[5m])",
           "instant": true,
-          "legendFormat": "scrape_up",
+          "legendFormat": "apache",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Gateway Scrape Status",
+      "title": "Apache Scrape Status (5m)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "from": 99.9,
+                "result": {
+                  "text": "UP"
+                },
+                "to": 100
+              },
+              "type": "range"
+            },
+            {
+              "options": {
+                "from": 0,
+                "result": {
+                  "text": "DEGRADED"
+                },
+                "to": 99.9
+              },
+              "type": "range"
+            }
+          ],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 80
+              },
+              {
+                "color": "yellow",
+                "value": 95
+              },
+              {
+                "color": "#009639",
+                "value": 99.9
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 3,
+        "x": 3,
+        "y": 0
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "editorMode": "code",
+          "expr": "100 * avg_over_time(up{job=\"iris_metrics_nginx\"}[5m])",
+          "instant": true,
+          "legendFormat": "nginx",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "NGINX Scrape Status (5m)",
       "type": "stat"
     },
     {
@@ -115,7 +242,38 @@
           },
           "unit": "percent"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^apache .*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7A3E9D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^nginx .*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#009639",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -147,7 +305,7 @@
           "editorMode": "code",
           "expr": "iris_cpu_usage",
           "instant": false,
-          "legendFormat": "cpu_usage",
+          "legendFormat": "{{gateway}} ({{instance}})",
           "range": true,
           "refId": "A"
         }
@@ -184,7 +342,38 @@
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^apache .*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7A3E9D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^nginx .*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#009639",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 8,
@@ -248,7 +437,38 @@
           },
           "unit": "ms"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^apache .*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#7A3E9D",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byRegexp",
+              "options": "^nginx .*"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#009639",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 9,
