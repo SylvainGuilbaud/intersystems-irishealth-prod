@@ -1,4 +1,4 @@
-Class DGLAB.transfo.IHEPAM.seances Extends Ens.DataTransformDTL [ DependsOn = EnsLib.HL7.Message ]
+Class APP.transfo.IHEPAM.seances Extends Ens.DataTransformDTL [ DependsOn = EnsLib.HL7.Message ]
 {
 
 Parameter GENERATEEMPTYSEGMENTS = 0;

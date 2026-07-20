@@ -9,5 +9,5 @@ CurrentDirectory=/journal1
 AlternateDirectory=/journal2
 
 [Startup]
-SystemMode=TECHNIDATA
+SystemMode=IRSHEALTH PROD
 TerminalPrompt=1,2,8

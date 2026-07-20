@@ -15,9 +15,9 @@ This repository provides a Docker-based InterSystems IRIS for Health environment
 
 During image build, [iris/iris.script](iris/iris.script) is executed and does the following:
 
-1. Switches to namespace `DGLAB`.
+1. Switches to namespace `APP`.
 2. Imports classes from `/home/irisowner/dev/src`.
-3. Creates a system-wide default setting for `TECHNIDATA` with value `DGLAB-V2`.
+3. Creates a system-wide default setting for `IRSHEALTH PROD` with value `APP-V2`.
 4. Sets `Deployable=1` for that default setting (`$lb(SettingValue, Description, Deployable)`).
 
 ## Docker Compose Services
@@ -163,7 +163,7 @@ Stop:
 
 ## Source Layout
 
-- [iris/src/DGLABPKG/FoundationProduction.cls](iris/src/DGLABPKG/FoundationProduction.cls): production definition.
-- [iris/src/DGLAB/router/HL7.cls](iris/src/DGLAB/router/HL7.cls): HL7 routing rules.
-- [iris/src/DGLAB/transfo](iris/src/DGLAB/transfo): message transforms.
+- [iris/src/APPPKG/FoundationProduction.cls](iris/src/APPPKG/FoundationProduction.cls): production definition.
+- [iris/src/APP/router/HL7.cls](iris/src/APP/router/HL7.cls): HL7 routing rules.
+- [iris/src/APP/transfo](iris/src/APP/transfo): message transforms.
 

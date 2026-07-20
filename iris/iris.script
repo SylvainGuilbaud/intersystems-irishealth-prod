@@ -1,8 +1,8 @@
     
-    zn "DGLAB"
+    zn "APP"
 
     do $system.OBJ.Import("/home/irisowner/dev/src", "ck")
 
-    set ^Ens.Config.DefaultSettingsD("*","*","*","TECHNIDATA")	=	$lb("DGLAB-V2","",1) ;# add default settings for TECHNIDATA (Deployable=1)
+    set ^Ens.Config.DefaultSettingsD("*","*","*","IRSHEALTH PROD")	=	$lb("APP-V2","",1) ;# add default settings for IRSHEALTH PROD (Deployable=1)
 
     halt
