@@ -1,7 +1,8 @@
-FROM python:3.12-alpine
+FROM alpine:3.20
 
-WORKDIR /app
-COPY server.py /app/server.py
+RUN apk add --no-cache curl
 
-EXPOSE 9101
-CMD ["python", "/app/server.py"]
+COPY poll.sh /usr/local/bin/poll.sh
+RUN chmod +x /usr/local/bin/poll.sh
+
+ENTRYPOINT ["/usr/local/bin/poll.sh"]
