@@ -9,5 +9,5 @@ CurrentDirectory=/journal1
 AlternateDirectory=/journal2
 
 [Startup]
-SystemMode=IRSHEALTH PROD
+SystemMode=IRISHEALTH PROD
 TerminalPrompt=1,2,8

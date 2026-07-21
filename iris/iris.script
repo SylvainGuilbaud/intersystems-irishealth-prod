@@ -3,6 +3,6 @@
 
     do $system.OBJ.Import("/home/irisowner/dev/src", "ck")
 
-    set ^Ens.Config.DefaultSettingsD("*","*","*","IRSHEALTH PROD")	=	$lb("APP-V2","",1) ;# add default settings for IRSHEALTH PROD (Deployable=1)
+    set ^Ens.Config.DefaultSettingsD("*","*","*","IRISHEALTH PROD")	=	$lb("APP-V2","",1) ;# add default settings for IRISHEALTH PROD (Deployable=1)
 
     halt

@@ -17,7 +17,7 @@ During image build, [iris/iris.script](iris/iris.script) is executed and does th
 
 1. Switches to namespace `APP`.
 2. Imports classes from `/home/irisowner/dev/src`.
-3. Creates a system-wide default setting for `IRSHEALTH PROD` with value `APP-V2`.
+3. Creates a system-wide default setting for `IRISHEALTH PROD` with value `APP-V2`.
 4. Sets `Deployable=1` for that default setting (`$lb(SettingValue, Description, Deployable)`).
 
 ## Docker Compose Services

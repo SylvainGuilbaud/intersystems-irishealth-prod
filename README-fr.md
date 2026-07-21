@@ -17,7 +17,7 @@ Pendant le build image, [iris/iris.script](iris/iris.script) est exécuté et fa
 
 1. Bascule dans le namespace `APP`.
 2. Importe les classes depuis `/home/irisowner/dev/src`.
-3. Crée un paramètre par défaut système `IRSHEALTH PROD` avec la valeur `APP-V2`.
+3. Crée un paramètre par défaut système `IRISHEALTH PROD` avec la valeur `APP-V2`.
 4. Positionne `Deployable=1` sur ce paramètre (`$lb(SettingValue, Description, Deployable)`).
 
 ## Services Docker Compose
