@@ -1,0 +1,90 @@
+groups:
+  - name: iris-storage
+    rules:
+      # 3. Database volume space low.
+      # iris_disk_percent_full reports the percent of the database directory's
+      # storage volume that is in use.
+      - alert: DatabaseSpaceLow
+        expr: max by (id, dir) (iris_disk_percent_full{gateway="nginx"}) > 90
+        for: 5m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "Database volume for {{ $labels.id }} is nearly full"
+          description: >-
+            The storage volume backing database {{ $labels.id }} ({{ $labels.dir }})
+            is {{ $value | printf "%.1f" }}% full.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/database-space-low.md"
+
+      # 4. Journal filesystem space low (primary journal directory).
+      # iris_jrn_free_space is expressed in megabytes.
+      - alert: JournalFilesystemSpaceLow
+        expr: min by (id, dir) (iris_jrn_free_space{gateway="nginx", id="primary"}) < 2048
+        for: 5m
+        labels:
+          severity: critical
+          category: storage
+        annotations:
+          summary: "Journal filesystem is low on space"
+          description: >-
+            The primary journal directory ({{ $labels.dir }}) has only
+            {{ $value | printf "%.0f" }} MB free. Journaling halts if the volume fills.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/journal-space-low.md"
+
+      # 5. WIJ filesystem space low.
+      - alert: WIJFilesystemSpaceLow
+        expr: min by (id, dir) (iris_jrn_free_space{gateway="nginx", id="WIJ"}) < 2048
+        for: 5m
+        labels:
+          severity: critical
+          category: storage
+        annotations:
+          summary: "WIJ filesystem is low on space"
+          description: >-
+            The write image journal directory ({{ $labels.dir }}) has only
+            {{ $value | printf "%.0f" }} MB free.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/wij-space-low.md"
+
+      # Container filesystem space low (cAdvisor, infrastructure layer).
+      - alert: ContainerFilesystemSpaceLow
+        expr: (container_fs_usage_bytes{name=~".+"} / container_fs_limit_bytes{name=~".+"}) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "Container {{ $labels.name }} filesystem is nearly full"
+          description: >-
+            Container {{ $labels.name }} is using {{ $value | printf "%.1f" }}% of its filesystem.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/database-space-low.md"
+
+      # 10. Backup / journal-backup stale (custom heartbeat metric).
+      # app_backup_age_seconds is emitted by APP.monitor.InteroperabilityMetrics and
+      # measures the time since the last recorded successful backup. > 90000s (~25h)
+      # means a daily backup has been missed.
+      - alert: BackupStale
+        expr: max(app_backup_age_seconds) > 90000
+        for: 5m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "No recent backup recorded"
+          description: >-
+            The last recorded successful backup is {{ $value | printf "%.0f" }} seconds old
+            (threshold 90000s / ~25h).
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/backup-stale.md"
+
+      - alert: JournalBackupStale
+        expr: max(app_journal_backup_age_seconds) > 90000
+        for: 5m
+        labels:
+          severity: warning
+          category: storage
+        annotations:
+          summary: "No recent journal backup recorded"
+          description: >-
+            The last recorded journal backup is {{ $value | printf "%.0f" }} seconds old
+            (threshold 90000s / ~25h).
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/backup-stale.md"

@@ -1,0 +1,122 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "graphTooltip": 0,
+  "title": "IRIS Alerts Overview",
+  "uid": "iris-alerts",
+  "tags": ["iris", "alerts", "monitoring"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "20s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "IRIS exporter availability",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } },
+            { "type": "value", "options": { "1": { "text": "UP", "color": "green" } } }
+          ],
+          "thresholds": { "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] }
+        }
+      },
+      "targets": [
+        { "refId": "A", "expr": "max(up{job=~\"iris_metrics_.*\"})", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Web Gateway availability",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "options": { "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } },
+            { "type": "value", "options": { "1": { "text": "UP", "color": "green" } } }
+          ]
+        },
+        "overrides": []
+      },
+      "targets": [
+        { "refId": "A", "expr": "up{job=~\"iris_metrics_.*\"}", "legendFormat": "{{gateway}}", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Suspended messages",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }
+      },
+      "targets": [
+        { "refId": "A", "expr": "max(iris_interop_messages_suspended{gateway=\"nginx\"})", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Production running",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "STOPPED", "color": "red" } } },
+            { "type": "value", "options": { "1": { "text": "RUNNING", "color": "green" } } }
+          ]
+        }
+      },
+      "targets": [
+        { "refId": "A", "expr": "max(app_production_running)", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Interoperability queue depth",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [
+        { "refId": "A", "expr": "iris_interop_queued{gateway=\"nginx\"}", "legendFormat": "{{host}}", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Journal & WIJ free space (MB)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "decmbytes" } },
+      "targets": [
+        { "refId": "A", "expr": "iris_jrn_free_space{gateway=\"nginx\"}", "legendFormat": "{{id}} ({{dir}})", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU & memory pressure (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100 } },
+      "targets": [
+        { "refId": "A", "expr": "iris_cpu_usage{gateway=\"nginx\"}", "legendFormat": "CPU", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "refId": "B", "expr": "iris_phys_mem_percent_used{gateway=\"nginx\"}", "legendFormat": "Memory", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Database volume full (%)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 13 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100 } },
+      "targets": [
+        { "refId": "A", "expr": "iris_disk_percent_full{gateway=\"nginx\"}", "legendFormat": "{{id}}", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    }
+  ]
+}

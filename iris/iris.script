@@ -1,8 +1,71 @@
+    zn "USER"
     
+    set r=##class(%Net.HttpRequest).%New(),r.Server="pm.community.intersystems.com",r.SSLConfiguration="ISC.FeatureTracker.SSL.Config" d r.Get("/packages/zpm/latest/installer"),$system.OBJ.LoadStream(r.HttpResponse.Data,"c")
+
+    zpm "enable -map -globally"
+    zpm "enable -community"
+    zpm "install swagger-ui" 
+    zpm "install webterminal"
+
     zn "APP"
 
     do $system.OBJ.Import("/home/irisowner/dev/src", "ck")
 
-    set ^Ens.Config.DefaultSettingsD("*","*","*","IRISHEALTH PROD")	=	$lb("APP-V2","",1) ;# add default settings for IRISHEALTH PROD (Deployable=1)
+    set ^Ens.Debug("UtilEnsMessages","sql")=1
+
+    set ^Ens.Config.DefaultSettingsD("*","*","*","AlertOnError")=$lb("1","",1) ;# add default settings for AlertOnError (Deployable=1)
+    set ^Ens.Config.DefaultSettingsD("*","*","*","ArchiveIO")=$lb("1","",0) ;# add default settings for ArchiveIO (Deployable=0)
+    set ^Ens.Config.DefaultSettingsD("*","*","*","LogTraceEvents")=$lb("0","",0) ;# add default settings for LogTraceEvents (Deployable=0)
+    set ^Ens.Config.DefaultSettingsD("*","*","*","RuleLogging")=$lb("a","",0) ;# add default settings for RuleLogging (Deployable=0)
+
+    set ^Ens.Config.DefaultSettingsD("*","Ens.Alert","*","AlertOnError")=$lb("0","",1) ;# add default settings for Ens.Alert (Deployable=1)
+    
+    // HL7 FileService input directories: map every EnsLib.HL7.Service.FileService item
+    // to its message-type directory under /data/HL7 (bind-mounted from ./data).
+    set ^Ens.Config.DefaultSettingsD("*","LAB RESULT from APP - FILE","EnsLib.HL7.Service.FileService","FilePath")=$lb("/data/HL7/ORU/in","",1)
+    set ^Ens.Config.DefaultSettingsD("*","Patient Information from IHE PAM - FILE","EnsLib.HL7.Service.FileService","FilePath")=$lb("/data/HL7/ADT/IHEPAM","",1)
+    set ^Ens.Config.DefaultSettingsD("*","Patient Information from IHE PAM","EnsLib.HL7.Service.FileService","FilePath")=$lb("/data/HL7/ADT/in","",1)
+
+    // HL7 HTTPService listeners: assign each EnsLib.HL7.Service.HTTPService item a
+    // dedicated standalone inbound HTTP port (published as a range in docker-compose).
+    set ^Ens.Config.DefaultSettingsD("*","LAB RESULT from APP - HTTP","EnsLib.HL7.Service.HTTPService","Port")=$lb("9980","",1)
+    set ^Ens.Config.DefaultSettingsD("*","Patient Information from IHE PAM - HTTP","EnsLib.HL7.Service.HTTPService","Port")=$lb("9981","",1)
+
+    // HL7 FileOperation output directories: map every EnsLib.HL7.Operation.FileOperation
+    // item to its message-type output directory under /data/HL7.
+    set ^Ens.Config.DefaultSettingsD("*","to EMR - FILE","EnsLib.HL7.Operation.FileOperation","FilePath")=$lb("/data/HL7/ORU/EMR","",1)
+    set ^Ens.Config.DefaultSettingsD("*","forward to LAB RESULT from APP - FILE","EnsLib.HL7.Operation.FileOperation","FilePath")=$lb("/data/HL7/ORU/out","",1)
+    set ^Ens.Config.DefaultSettingsD("*","forward Patient Information to APP - FILE","EnsLib.HL7.Operation.FileOperation","FilePath")=$lb("/data/HL7/ADT/out","",1)
+
+    // HL7 TCPService listeners (MLLP): assign each EnsLib.HL7.Service.TCPService item a
+    // dedicated inbound MLLP port (published as a range in docker-compose).
+    set ^Ens.Config.DefaultSettingsD("*","LAB RESULT from APP - MLLP","EnsLib.HL7.Service.TCPService","Port")=$lb("9990","",1)
+    set ^Ens.Config.DefaultSettingsD("*","Patient Information from IHE PAM - MLLP","EnsLib.HL7.Service.TCPService","Port")=$lb("9991","",1)
+
+    // HL7 TCPOperation (MLLP) outbound target. In this lab it points to the local APP
+    // MLLP intake; set IPAddress/Port to your real downstream system in production.
+    set ^Ens.Config.DefaultSettingsD("*","forward Patient Information to APP - MLLP","EnsLib.HL7.Operation.TCPOperation","IPAddress")=$lb("127.0.0.1","",1)
+    set ^Ens.Config.DefaultSettingsD("*","forward Patient Information to APP - MLLP","EnsLib.HL7.Operation.TCPOperation","Port")=$lb("9991","",1)
+
+    // Auto-start the interoperability production on instance/namespace startup.
+    do ##class(Ens.Director).SetAutoStart("APPPKG.FoundationProduction")
+
+    // --- Monitoring / alerting lab -------------------------------------------------
+    // Enable native interoperability SAM metrics for this namespace so that the
+    // iris_interop_* metrics (queued, messages_suspended, hosts, ...) are exported by
+    // /api/monitor/metrics.
+    do ##class(Ens.Util.Statistics).EnableSAMForNamespace()
+
+
+    // Register the custom application-metric class (app_* metrics) with the /metrics
+    // endpoint. Must be re-run after an InterSystems IRIS upgrade.
+    zn "%SYS"
+    set sc = ##class(SYS.Monitor.SAM.Config).AddApplicationClass("APP.monitor.InteroperabilityMetrics","APP")
+    // Grant the unauthenticated /api/monitor web application the roles needed to read
+    // APP data so the custom app_* and iris_interop_* metrics are emitted.
+    // NOTE: :%All is a lab convenience; use a least-privilege role (e.g. %DB_<APPDB>)
+    // in production.
+    set p("MatchRoles") = ":%All"
+    set sc = ##class(Security.Applications).Modify("/api/monitor", .p)  
 
     halt

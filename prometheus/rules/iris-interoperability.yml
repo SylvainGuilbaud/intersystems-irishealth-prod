@@ -1,0 +1,66 @@
+groups:
+  - name: iris-interoperability
+    rules:
+      # 8. Interoperability queue backlog.
+      # Combines absolute depth, growth rate and duration. A fixed queue size is a
+      # poor signal on its own: 500 messages may be normal for one interface and
+      # catastrophic for another. iris_interop_queued is the native SAM metric.
+      - alert: IRISInteroperabilityQueueBacklog
+        expr: |
+          iris_interop_queued{gateway="nginx"} > 100
+          and
+          deriv(iris_interop_queued{gateway="nginx"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+          category: interoperability
+        annotations:
+          summary: "Interoperability queue is growing"
+          description: >-
+            Queue for host {{ $labels.host }} (production {{ $labels.production }})
+            holds {{ $value }} messages and has grown continuously for at least
+            five minutes.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/queue-backlog.md"
+
+      # 9. Suspended interoperability messages.
+      - alert: IRISSuspendedMessages
+        expr: max by (id, production) (iris_interop_messages_suspended{gateway="nginx"}) > 0
+        for: 1m
+        labels:
+          severity: warning
+          category: interoperability
+        annotations:
+          summary: "Suspended interoperability messages present"
+          description: >-
+            {{ $value }} suspended message(s) in namespace {{ $labels.id }}
+            (production {{ $labels.production }}). Suspended messages require
+            manual review and resubmission.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/suspended-messages.md"
+
+      # Errored messages accumulating over a recent interval.
+      - alert: IRISInteroperabilityErrorsRising
+        expr: increase(iris_interop_messages_errored{gateway="nginx"}[10m]) > 0
+        for: 5m
+        labels:
+          severity: info
+          category: interoperability
+        annotations:
+          summary: "Interoperability errors are accumulating"
+          description: >-
+            Host {{ $labels.host }} (production {{ $labels.production }}) has
+            errored messages increasing over the last 10 minutes.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/suspended-messages.md"
+
+      # Interoperability host in Error/Retry status (native SAM metric).
+      - alert: IRISInteroperabilityHostNotOK
+        expr: max by (host, status, production) (iris_interop_hosts{gateway="nginx", status=~"Error|Retry"}) > 0
+        for: 2m
+        labels:
+          severity: warning
+          category: interoperability
+        annotations:
+          summary: "Interoperability host {{ $labels.host }} is in {{ $labels.status }}"
+          description: >-
+            Host {{ $labels.host }} (production {{ $labels.production }}) is
+            reporting status {{ $labels.status }}.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/queue-backlog.md"

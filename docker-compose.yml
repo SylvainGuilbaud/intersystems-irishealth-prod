@@ -8,6 +8,8 @@ services:
     hostname: irishealth
     ports:
       - ${IRIS_PORT}:1972
+      - ${HL7_HTTP_PORT_RANGE:-9980-9989}:${HL7_HTTP_PORT_RANGE:-9980-9989}
+      - ${HL7_MLLP_PORT_RANGE:-9990-9999}:${HL7_MLLP_PORT_RANGE:-9990-9999}
     volumes:
       - iris-data:/iris-data
       - ./journal1:/journal1
@@ -16,6 +18,7 @@ services:
       - ./iris/key/iris.key:/tmp/iris.key:ro
       - ./iris/python/iris_python_demo:/usr/irissys/mgr/python/iris_python_demo
       - ./merge.cpf:/merge.cpf
+      - ./data:/data
     command: --key /tmp/iris.key
     restart: unless-stopped
     environment:
@@ -93,11 +96,46 @@ services:
       - nginx-webgateway
       - apache-webgateway
       - metrics-cache
+      - alertmanager
+      - cadvisor
     ports:
       - ${PROMETHEUS_PORT_HTTP:-9090}:9090
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/rules:/etc/prometheus/rules:ro
       - prometheus-data:/prometheus
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    container_name: alertmanager
+    command:
+      - --config.file=/etc/alertmanager/alertmanager.yml
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    ports:
+      - ${ALERTMANAGER_PORT_HTTP:-9093}:9093
+    restart: unless-stopped
+
+  alert-receiver:
+    build:
+      context: ./alert-receiver
+    container_name: alert-receiver
+    ports:
+      - ${ALERT_RECEIVER_PORT_HTTP:-8088}:8080
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.2
+    container_name: cadvisor
+    privileged: true
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+    ports:
+      - ${CADVISOR_PORT_HTTP:-8085}:8080
     restart: unless-stopped
 
   grafana:

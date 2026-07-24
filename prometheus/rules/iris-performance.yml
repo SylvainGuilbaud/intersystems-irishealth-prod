@@ -1,0 +1,58 @@
+groups:
+  - name: iris-performance
+    rules:
+      # 6. Sustained CPU pressure (IRIS view of total OS CPU usage).
+      - alert: SustainedCPUPressure
+        expr: max(iris_cpu_usage{gateway="nginx"}) > 85
+        for: 10m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "Sustained high CPU usage"
+          description: >-
+            Operating-system CPU usage reported by IRIS has stayed above 85%
+            for 10 minutes (currently {{ $value | printf "%.0f" }}%).
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/iris-unavailable.md"
+
+      # 7. Memory pressure.
+      - alert: MemoryPressure
+        expr: max(iris_phys_mem_percent_used{gateway="nginx"}) > 90
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "Physical memory pressure"
+          description: >-
+            Physical memory usage reported by IRIS is {{ $value | printf "%.0f" }}%
+            (threshold 90%).
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/iris-unavailable.md"
+
+      # 11. Concurrent-user license pressure (optional / environment-specific).
+      - alert: LicenseUsageHigh
+        expr: max(iris_license_percent_used{gateway="nginx"}) > 85
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "License consumption is high"
+          description: >-
+            {{ $value | printf "%.0f" }}% of the IRIS license units are in use
+            (threshold 85%).
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/iris-unavailable.md"
+
+      # Container CPU saturation (cAdvisor, infrastructure layer).
+      - alert: ContainerCPUSaturation
+        expr: sum by (name) (rate(container_cpu_usage_seconds_total{name=~".+"}[5m])) > 0.9
+        for: 10m
+        labels:
+          severity: info
+          category: performance
+        annotations:
+          summary: "Container {{ $labels.name }} is CPU-bound"
+          description: >-
+            Container {{ $labels.name }} has averaged more than 0.9 CPU cores
+            over the last 5 minutes for 10 minutes.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/iris-unavailable.md"

@@ -1,0 +1,49 @@
+groups:
+  - name: iris-availability
+    rules:
+      # 1. IRIS metrics endpoint unavailable.
+      # Fires when no IRIS metrics scrape target is up: IRIS itself, the internal
+      # webgateway-live, the metrics-cache poller, or both public Web Gateways are down.
+      - alert: IRISMetricsEndpointDown
+        expr: max(up{job=~"iris_metrics_.*"}) == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "IRIS metrics endpoint is unreachable"
+          description: >-
+            No IRIS metrics scrape target has been up for at least one minute.
+            IRIS, the metrics cache, or both Web Gateways may be down.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/iris-unavailable.md"
+
+      # 2. Web Gateway unavailable (per gateway).
+      # Each public gateway (nginx, apache) is scraped as a separate job; this fires
+      # when either one stops responding while the other may still be serving traffic.
+      - alert: WebGatewayDown
+        expr: up{job=~"iris_metrics_.*"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          category: availability
+        annotations:
+          summary: "Web Gateway {{ $labels.gateway }} is unreachable"
+          description: >-
+            Scrape target {{ $labels.instance }} (gateway {{ $labels.gateway }})
+            has been down for at least one minute.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/gateway-unavailable.md"
+
+      # Interoperability production not running (custom app_ metric).
+      # Requires the APP.monitor.InteroperabilityMetrics application-metrics class.
+      - alert: IRISProductionNotRunning
+        expr: max(app_production_running) < 1
+        for: 2m
+        labels:
+          severity: critical
+          category: interoperability
+        annotations:
+          summary: "Interoperability production is not running"
+          description: >-
+            The custom app_production_running metric reports the production is
+            not in the Running state.
+          runbook_url: "https://github.com/SylvainGuilbaud/intersystems-irishealth-prod/blob/main/docs/runbooks/iris-unavailable.md"
